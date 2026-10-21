@@ -1,0 +1,46 @@
+name: Build Report
+
+on:
+  push:
+    branches:
+      - add-build-report
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Trivial build step
+        run: |
+          echo "Running a trivial build..."
+          echo "Build timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Build OK"
+
+      - name: Write build report
+        run: |
+          mkdir -p build-output
+          {
+            echo "# Build report"
+            echo ""
+            echo "Branch:        $GITHUB_REF_NAME"
+            echo "Commit:        $GITHUB_SHA"
+            echo "Completed at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "Status:        success"
+            echo ""
+            echo "This file was produced by the build-report workflow and is"
+            echo "uploaded as a GitHub Actions artifact named 'build-report'."
+          } > build-output/report.txt
+          cat build-output/report.txt
+
+      - name: Upload build report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report
+          path: build-output/report.txt
+          retention-days: 30
